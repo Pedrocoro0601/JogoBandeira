@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <!-- NOVO: Biblioteca para gerar o código de validação (hash) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         /* Estilos CSS para o jogo */
         :root {
@@ -39,12 +41,11 @@
         }
         
         #tela-inicial {
-            /* Adiciona o fundo do Corinthians para a tela inicial */
             background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Corinthians_logo.svg/1200px-Corinthians_logo.svg.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            background-color: rgba(10, 25, 47, 0.95); /* Cor de fundo semi-transparente para melhor legibilidade */
+            background-color: rgba(10, 25, 47, 0.95);
             position: relative;
         }
         
@@ -61,15 +62,13 @@
             font-size: 0.9rem;
             color: #fff;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-            /* Adiciona o gradiente de texto para a classe 'creditos' */
             background: linear-gradient(90deg, #ff0000, #ff4d4d);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        /* Estilo para a mensagem de incentivo */
         .pix-incentivo {
-            color: #ffeb3b; /* Amarelo para destaque */
+            color: #ffeb3b;
             font-weight: bold;
             font-size: 1.1rem;
             margin-top: 15px;
@@ -77,17 +76,9 @@
         }
         
         .pix-incentivo .pix-valor {
-            color: #ff4d4d; /* Vermelho */
+            color: #ff4d4d;
         }
         
-        @media print {
-          .creditos {
-            background: none;
-            -webkit-text-fill-color: #000;
-          }
-        }
-
-
         .container {
             width: 100%;
             max-width: 800px;
@@ -100,17 +91,12 @@
             transition: transform 0.5s ease;
         }
         
-        .container.hidden {
-            display: none;
-        }
-
         h1 {
             color: var(--cor-principal);
             font-size: 2.5rem;
             margin-bottom: 20px;
         }
 
-        /* --- Estilos do Placar --- */
         .placar-container {
             display: flex;
             justify-content: space-around;
@@ -149,7 +135,7 @@
             border-top-color: transparent;
             animation: spin 1s linear infinite;
             margin-right: 10px;
-            display: none; /* Inicia escondido */
+            display: none;
         }
 
         @keyframes spin {
@@ -157,7 +143,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- Estilos da Bandeira --- */
         .bandeira-container {
             min-height: 150px;
             display: flex;
@@ -176,13 +161,6 @@
             background-color: #f0f0f0;
         }
         
-        @media (max-width: 600px) {
-            #bandeira {
-                max-width: 80%;
-            }
-        }
-
-        /* --- Estilos das Opções --- */
         .opcoes {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -225,7 +203,6 @@
             opacity: 0.6;
         }
 
-        /* --- Estilos de Feedback --- */
         .feedback {
             font-size: 1.5rem;
             font-weight: bold;
@@ -236,7 +213,6 @@
         .feedback.acerto { color: #28a745; }
         .feedback.erro { color: #dc3545; }
 
-        /* --- Telas de Jogo --- */
         #tela-inicial, #tela-fim-jogo {
             position: absolute;
             top: 0;
@@ -269,6 +245,21 @@
             margin-bottom: 20px;
             font-weight: bold;
         }
+        
+        /* NOVO: Estilo para o código de validação */
+        #validacao-container {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: var(--cor-secundaria);
+        }
+        #codigo-validacao {
+            font-weight: bold;
+            color: var(--cor-principal);
+            background-color: #0a192f;
+            padding: 5px 10px;
+            border-radius: 5px;
+            user-select: all;
+        }
 
         .btn-principal {
             background-color: var(--cor-principal);
@@ -289,69 +280,26 @@
             background-color: #79f7bd;
         }
         
-        .fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .fade-in {
-            opacity: 1;
-            pointer-events: all;
-        }
+        .fade-out { opacity: 0; pointer-events: none; }
+        .fade-in { opacity: 1; pointer-events: all; }
         
-        .social-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
+        .social-buttons { display: flex; gap: 15px; margin-top: 20px; }
         
-        /* Adiciona media queries para responsividade em dispositivos móveis */
         @media (max-width: 768px) {
-            .placar-container {
-               display: grid;
-               grid-template-columns: 1fr 1fr;
-               gap: 10px;
-            }
-
-            .placar-item.mobile-hide {
-                display: none;
-            }
-
-            .opcoes {
-                grid-template-columns: 1fr;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .opcoes button {
-                font-size: 1rem;
-                padding: 12px 20px;
-            }
-
-            .feedback {
-                font-size: 1.2rem;
-            }
-
-            #tela-fim-jogo h2 {
-                font-size: 2rem;
-            }
-
-            #tela-fim-jogo p {
-                font-size: 1.2rem;
-            }
-
-            #feedback-final {
-                font-size: 1.5rem;
-            }
+            .placar-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            .placar-item.mobile-hide { display: none; }
+            .opcoes { grid-template-columns: 1fr; }
+            h1 { font-size: 2rem; }
+            .opcoes button { font-size: 1rem; padding: 12px 20px; }
+            .feedback { font-size: 1.2rem; }
+            #tela-fim-jogo h2 { font-size: 2rem; }
+            #tela-fim-jogo p { font-size: 1.2rem; }
+            #feedback-final { font-size: 1.5rem; }
         }
-
     </style>
 </head>
 <body>
     <div class="container" id="jogo-container">
-        <!-- Tela inicial, aparece por padrão -->
         <div id="tela-inicial" class="fade-in">
             <h1>Adivinhe a Bandeira</h1>
             <button id="btn-iniciar" class="btn-principal">Começar Jogo</button>
@@ -359,9 +307,7 @@
             <p class="creditos">Feito por Pedro Henrique</p>
         </div>
 
-        <!-- Conteúdo principal do jogo, aparece após clicar em 'Começar' -->
         <div id="conteudo-jogo" class="fade-out">
-            <!-- Título removido desta tela -->
             <div class="placar-container">
                 <div class="placar-item mobile-hide">Acertos: <span id="placar-acertos">0</span></div>
                 <div class="placar-item mobile-hide">Sequência: <span id="placar-streak">0</span></div>
@@ -388,23 +334,23 @@
             <p id="feedback-mensagem" class="feedback"></p>
         </div>
 
-        <!-- Tela de Fim de Jogo -->
         <div id="tela-fim-jogo" class="fade-out">
             <h2>Fim de Jogo!</h2>
             <p id="feedback-final"></p>
             <p>Seu placar final foi: <span id="placar-final-acertos">0</span> acertos.</p>
-            <p>Sua maior sequência foi: <span id="placar-final-streak">0</span>.</p>
             <p>Seu tempo total de jogo foi: <span id="placar-final-tempo">00:00</span>.</p>
+            <!-- NOVO: Container para o código de validação -->
+            <div id="validacao-container">
+                Código de Validação: <span id="codigo-validacao"></span>
+            </div>
             <div class="social-buttons">
-                <button id="btn-compartilhar-whatsapp" class="btn-principal">Compartilhar o resultado com Pedro</button>
+                <button id="btn-compartilhar-whatsapp" class="btn-principal">Compartilhar Resultado</button>
             </div>
             <button id="btn-reiniciar" class="btn-principal">Jogar Novamente</button>
         </div>
     </div>
     
     <script>
-        // Lógica do jogo em JavaScript
-        
         const bandeiras = [
             { pais: "Brasil", codigo: "br" }, { pais: "Japão", codigo: "jp" }, { pais: "Estados Unidos", codigo: "us" },
             { pais: "Canadá", codigo: "ca" }, { pais: "Austrália", codigo: "au" }, { pais: "Alemanha", codigo: "de" },
@@ -483,15 +429,12 @@
 
         // --- Variáveis de Estado do Jogo ---
         let placarAcertos = 0;
-        let sequenciaAcertos = 0;
-        let maiorSequencia = 0;
-        let tempoRestanteRodada = 5;
         let tempoTotalJogo = 0;
         let timerRodada;
         let timerJogo;
-        let bandeiraAtual;
-        let opcoesBotoes;
         let jogoAtivo = false;
+        // NOVO: Palavra-chave secreta para o código de validação.
+        const SECRET_KEY = "SuaChaveSuperSecretaAqui";
 
         // --- Referências aos Elementos do DOM ---
         const telaInicial = document.getElementById('tela-inicial');
@@ -500,30 +443,15 @@
         const btnIniciar = document.getElementById('btn-iniciar');
         const btnReiniciar = document.getElementById('btn-reiniciar');
         const btnCompartilharWhatsApp = document.getElementById('btn-compartilhar-whatsapp');
-        
-        const bandeiraElemento = document.getElementById('bandeira');
-        const opcoesContainer = document.getElementById('opcoes-container');
-        const feedbackMensagem = document.getElementById('feedback-mensagem');
-
-        const placarAcertosElemento = document.getElementById('placar-acertos');
-        const placarStreakElemento = document.getElementById('placar-streak');
-        const placarTempoRodadaElemento = document.getElementById('placar-tempo-rodada');
-        const placarTempoTotalElemento = document.getElementById('placar-tempo-total');
         const placarTotalBandeirasElemento = document.getElementById('placar-total-bandeiras');
-        const roundSpinner = document.getElementById('round-spinner');
-        
         const placarFinalAcertosElemento = document.getElementById('placar-final-acertos');
-        const placarFinalStreakElemento = document.getElementById('placar-final-streak');
         const placarFinalTempoElemento = document.getElementById('placar-final-tempo');
         const feedbackFinalElemento = document.getElementById('feedback-final');
-
-        // --- Funções do Jogo ---
-
+        const codigoValidacaoElemento = document.getElementById('codigo-validacao');
+        
         function iniciarJogo() {
             jogoAtivo = true;
             placarAcertos = 0;
-            sequenciaAcertos = 0;
-            maiorSequencia = 0;
             tempoTotalJogo = 0;
             
             atualizarPlacar();
@@ -540,41 +468,37 @@
         }
 
         function proximaRodada() {
-            tempoRestanteRodada = 5;
-            placarTempoRodadaElemento.textContent = tempoRestanteRodada;
-            roundSpinner.style.display = 'block';
+            let tempoRestanteRodada = 5;
+            document.getElementById('placar-tempo-rodada').textContent = tempoRestanteRodada;
+            document.getElementById('round-spinner').style.display = 'block';
+            document.getElementById('feedback-mensagem').textContent = '';
+            document.getElementById('feedback-mensagem').className = 'feedback';
 
-            feedbackMensagem.textContent = '';
-            feedbackMensagem.className = 'feedback';
-
-            opcoesBotoes = Array.from(opcoesContainer.children);
+            const opcoesBotoes = Array.from(document.getElementById('opcoes-container').children);
             opcoesBotoes.forEach(btn => {
                 btn.disabled = false;
                 btn.classList.remove('correta', 'incorreta');
-                btn.className = 'opcao-btn';
             });
             
             const bandeiraCorreta = bandeiras[Math.floor(Math.random() * bandeiras.length)];
-            bandeiraAtual = bandeiraCorreta;
+            window.bandeiraAtual = bandeiraCorreta;
 
             const opcoesIncorretas = selecionarOpcoesIncorretas(bandeiraCorreta.pais, 3);
             const opcoesParaExibir = [bandeiraCorreta.pais, ...opcoesIncorretas];
             
             embaralharArray(opcoesParaExibir);
             
-            bandeiraElemento.src = `https://flagcdn.com/w320/${bandeiraAtual.codigo}.png`;
-            bandeiraElemento.alt = `Bandeira do(a) ${bandeiraAtual.pais}`;
+            document.getElementById('bandeira').src = `https://flagcdn.com/w320/${bandeiraCorreta.codigo}.png`;
             opcoesBotoes.forEach((btn, index) => {
                 btn.textContent = opcoesParaExibir[index];
             });
 
-            iniciarCronometroRodada();
+            iniciarCronometroRodada(tempoRestanteRodada);
         }
 
         function selecionarOpcoesIncorretas(paisCorreto, quantidade) {
             const opcoes = bandeiras.map(b => b.pais).filter(p => p !== paisCorreto);
             const opcoesAleatorias = [];
-            
             while (opcoesAleatorias.length < quantidade) {
                 const index = Math.floor(Math.random() * opcoes.length);
                 const opcao = opcoes[index];
@@ -594,74 +518,48 @@
 
         function verificarResposta(event) {
             if (!jogoAtivo) return;
-
             const botaoClicado = event.target;
             if (!botaoClicado.classList.contains('opcao-btn')) return;
 
             clearInterval(timerRodada);
-            roundSpinner.style.display = 'none';
-
-            opcoesBotoes.forEach(btn => btn.disabled = true);
+            document.getElementById('round-spinner').style.display = 'none';
+            Array.from(document.getElementById('opcoes-container').children).forEach(btn => btn.disabled = true);
             
-            const resposta = botaoClicado.textContent;
-            const respostaCorreta = bandeiraAtual.pais;
-
-            if (resposta === respostaCorreta) {
+            const respostaCorreta = window.bandeiraAtual.pais;
+            if (botaoClicado.textContent === respostaCorreta) {
                 placarAcertos++;
-                sequenciaAcertos++;
-                if (sequenciaAcertos > maiorSequencia) {
-                    maiorSequencia = sequenciaAcertos;
-                }
                 botaoClicado.classList.add('correta');
-                feedbackMensagem.textContent = 'Correto!';
-                feedbackMensagem.classList.add('acerto');
+                document.getElementById('feedback-mensagem').textContent = 'Correto!';
+                document.getElementById('feedback-mensagem').classList.add('acerto');
                 setTimeout(proximaRodada, 1500);
             } else {
-                sequenciaAcertos = 0;
                 botaoClicado.classList.add('incorreta');
-                
-                const botaoCorreto = opcoesBotoes.find(btn => btn.textContent === respostaCorreta);
-                if (botaoCorreto) {
-                    botaoCorreto.classList.add('correta');
-                }
-                
-                feedbackMensagem.textContent = 'Errado! A resposta era ' + respostaCorreta + '.';
-                feedbackMensagem.classList.add('erro');
-
+                const botaoCorreto = Array.from(document.getElementById('opcoes-container').children).find(btn => btn.textContent === respostaCorreta);
+                if (botaoCorreto) botaoCorreto.classList.add('correta');
+                document.getElementById('feedback-mensagem').textContent = `Errado! A resposta era ${respostaCorreta}.`;
+                document.getElementById('feedback-mensagem').classList.add('erro');
                 setTimeout(fimDeJogo, 2000);
             }
-
             atualizarPlacar();
         }
 
         function atualizarPlacar() {
-            placarAcertosElemento.textContent = placarAcertos;
-            placarStreakElemento.textContent = sequenciaAcertos;
+            document.getElementById('placar-acertos').textContent = placarAcertos;
             placarTotalBandeirasElemento.textContent = `${String(placarAcertos).padStart(2, '0')}/${bandeiras.length}`;
         }
 
-        function iniciarCronometroRodada() {
+        function iniciarCronometroRodada(tempo) {
+            let tempoRestante = tempo;
             timerRodada = setInterval(() => {
-                tempoRestanteRodada--;
-                placarTempoRodadaElemento.textContent = tempoRestanteRodada;
-
-                if (tempoRestanteRodada <= 0) {
+                tempoRestante--;
+                document.getElementById('placar-tempo-rodada').textContent = tempoRestante;
+                if (tempoRestante <= 0) {
                     clearInterval(timerRodada);
-                    roundSpinner.style.display = 'none';
-                    sequenciaAcertos = 0;
-                    atualizarPlacar();
-                    
-                    const respostaCorreta = bandeiraAtual.pais;
-                    const botaoCorreto = opcoesBotoes.find(btn => btn.textContent === respostaCorreta);
-                    if (botaoCorreto) {
-                        botaoCorreto.classList.add('correta');
-                    }
-                    
-                    feedbackMensagem.textContent = 'Tempo esgotado! A resposta era ' + respostaCorreta + '.';
-                    feedbackMensagem.classList.add('erro');
-                    
-                    opcoesBotoes.forEach(btn => btn.disabled = true);
-                    
+                    document.getElementById('round-spinner').style.display = 'none';
+                    const respostaCorreta = window.bandeiraAtual.pais;
+                    document.getElementById('feedback-mensagem').textContent = `Tempo esgotado! A resposta era ${respostaCorreta}.`;
+                    document.getElementById('feedback-mensagem').classList.add('erro');
+                    Array.from(document.getElementById('opcoes-container').children).forEach(btn => btn.disabled = true);
                     setTimeout(fimDeJogo, 2000);
                 }
             }, 1000);
@@ -671,44 +569,41 @@
             let segundos = 0;
             timerJogo = setInterval(() => {
                 segundos++;
+                tempoTotalJogo = segundos;
                 const minutos = Math.floor(segundos / 60);
                 const segundosRestantes = segundos % 60;
-                placarTempoTotalElemento.textContent = 
+                document.getElementById('placar-tempo-total').textContent = 
                     `${String(minutos).padStart(2, '0')}:${String(segundosRestantes).padStart(2, '0')}`;
-                tempoTotalJogo = segundos;
             }, 1000);
         }
 
-        function obterFeedbackFinal(acertos) {
-            if (acertos === bandeiras.length) {
-                return "Parabéns! Você acertou todas e ganhou o PIX!";
-            }
-            if (acertos < 5) {
-                return "Precisa estudar mais as bandeiras!";
-            } else if (acertos < 10) {
-                return "Nada mal, mas pode melhorar!";
-            } else if (acertos < 20) {
-                return "Bom trabalho! Você conhece bastante.";
-            } else {
-                return "Excelente! Você é um mestre das bandeiras!";
-            }
+        // NOVO: Função para gerar o código de validação
+        function gerarCodigoValidacao(acertos, tempo) {
+            const data = `${acertos}-${tempo}-${SECRET_KEY}`;
+            const hash = CryptoJS.SHA256(data).toString();
+            return hash.substring(0, 8).toUpperCase();
         }
 
         function fimDeJogo() {
             jogoAtivo = false;
             clearInterval(timerRodada);
             clearInterval(timerJogo);
-            roundSpinner.style.display = 'none';
 
-            placarFinalAcertosElemento.textContent = placarAcertos;
-            placarFinalStreakElemento.textContent = maiorSequencia;
-            
             const minutos = Math.floor(tempoTotalJogo / 60);
             const segundosRestantes = tempoTotalJogo % 60;
-            placarFinalTempoElemento.textContent = 
-                `${String(minutos).padStart(2, '0')}:${String(segundosRestantes).padStart(2, '0')}`;
+            const tempoFormatado = `${String(minutos).padStart(2, '0')}:${String(segundosRestantes).padStart(2, '0')}`;
+            
+            placarFinalAcertosElemento.textContent = placarAcertos;
+            placarFinalTempoElemento.textContent = tempoFormatado;
+            
+            const codigo = gerarCodigoValidacao(placarAcertos, tempoFormatado);
+            codigoValidacaoElemento.textContent = codigo;
 
-            feedbackFinalElemento.textContent = obterFeedbackFinal(placarAcertos);
+            if (placarAcertos === bandeiras.length) {
+                feedbackFinalElemento.textContent = "Parabéns! Você acertou todas e ganhou o PIX!";
+            } else {
+                feedbackFinalElemento.textContent = "Precisa estudar mais as bandeiras!";
+            }
 
             conteudoJogo.classList.remove('fade-in');
             conteudoJogo.classList.add('fade-out');
@@ -723,13 +618,17 @@
             telaInicial.classList.add('fade-in');
         }
         
-        // MODIFICADO: Função de compartilhamento com nova mensagem
         function compartilharComPedro() {
-            const numeroTelefone = '5534988301561'; 
-            let mensagem = `Meu resultado no Adivinhe a Bandeira:\n\nAcertos: ${placarAcertos}\nTempo Total: ${placarFinalTempoElemento.textContent}`;
+            const numeroTelefone = '5534988301561';
+            const tempoFinal = placarFinalTempoElemento.textContent;
+            const codigo = codigoValidacaoElemento.textContent;
+            
+            let mensagem = `Meu resultado no Adivinhe a Bandeira:\n\nAcertos: ${placarAcertos}\nTempo Total: ${tempoFinal}\nCódigo: ${codigo}`;
 
             if (placarAcertos < bandeiras.length) {
-                mensagem += "\n\nNão foi dessa vez que você ganhou os 20 reais. Tente novamente!";
+                mensagem += "\n\nNão foi dessa vez que ganhei os 20 reais. Tente novamente!";
+            } else {
+                mensagem += "\n\nConsegui! Acertei todas as bandeiras!";
             }
 
             const url = `https://api.whatsapp.com/send?phone=${numeroTelefone}&text=${encodeURIComponent(mensagem)}`;
@@ -739,9 +638,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             btnIniciar.addEventListener('click', iniciarJogo);
             btnReiniciar.addEventListener('click', reiniciarJogo);
-            opcoesContainer.addEventListener('click', verificarResposta);
+            document.getElementById('opcoes-container').addEventListener('click', verificarResposta);
             btnCompartilharWhatsApp.addEventListener('click', compartilharComPedro);
-            
             placarTotalBandeirasElemento.textContent = `0/${bandeiras.length}`;
         });
     </script>
