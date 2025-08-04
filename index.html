@@ -246,7 +246,6 @@
             font-weight: bold;
         }
         
-        /* NOVO: Estilo para o código de validação */
         #validacao-container {
             margin-top: 15px;
             font-size: 1rem;
@@ -303,7 +302,7 @@
         <div id="tela-inicial" class="fade-in">
             <h1>Adivinhe a Bandeira</h1>
             <button id="btn-iniciar" class="btn-principal">Começar Jogo</button>
-            <p class="pix-incentivo">Acerte todas as bandeiras e ganhe um <span class="pix-valor">PIX de R$20!</span></p>
+            <p class="pix-incentivo">Acerte todas as bandeiras e ganhe um <span class="pix-valor">PIX de R$20! (Sem limite)</span></p>
             <p class="creditos">Feito por Pedro Henrique</p>
         </div>
 
@@ -339,12 +338,11 @@
             <p id="feedback-final"></p>
             <p>Seu placar final foi: <span id="placar-final-acertos">0</span> acertos.</p>
             <p>Seu tempo total de jogo foi: <span id="placar-final-tempo">00:00</span>.</p>
-            <!-- NOVO: Container para o código de validação -->
             <div id="validacao-container">
                 Código de Validação: <span id="codigo-validacao"></span>
             </div>
             <div class="social-buttons">
-                <button id="btn-compartilhar-whatsapp" class="btn-principal">Compartilhar Resultado</button>
+                <button id="btn-compartilhar-whatsapp" class="btn-principal">Compartilhar Resultado com Pedro</button>
             </div>
             <button id="btn-reiniciar" class="btn-principal">Jogar Novamente</button>
         </div>
@@ -427,16 +425,13 @@
             { pais: "Território Britânico do Oceano Índico", codigo: "io" }, { pais: "Ilhas Virgens Americanas", codigo: "vi" }, { pais: "Ilhas Turcas e Caicos", codigo: "tc" }
         ];
 
-        // --- Variáveis de Estado do Jogo ---
         let placarAcertos = 0;
         let tempoTotalJogo = 0;
         let timerRodada;
         let timerJogo;
         let jogoAtivo = false;
-        // NOVO: Palavra-chave secreta para o código de validação.
         const SECRET_KEY = "SuaChaveSuperSecretaAqui";
 
-        // --- Referências aos Elementos do DOM ---
         const telaInicial = document.getElementById('tela-inicial');
         const conteudoJogo = document.getElementById('conteudo-jogo');
         const telaFimJogo = document.getElementById('tela-fim-jogo');
@@ -577,7 +572,6 @@
             }, 1000);
         }
 
-        // NOVO: Função para gerar o código de validação
         function gerarCodigoValidacao(acertos, tempo) {
             const data = `${acertos}-${tempo}-${SECRET_KEY}`;
             const hash = CryptoJS.SHA256(data).toString();
