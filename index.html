@@ -66,6 +66,15 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
+        /* NOVO: Estilo para a mensagem de incentivo */
+        .pix-incentivo {
+            color: #ffeb3b; /* Amarelo para destaque */
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
         
         @media print {
           .creditos {
@@ -250,6 +259,14 @@
             font-size: 1.5rem;
         }
 
+        /* NOVO: Estilo para o feedback final */
+        #feedback-final {
+            font-size: 1.8rem;
+            color: var(--cor-principal);
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
         .btn-principal {
             background-color: var(--cor-principal);
             color: var(--cor-fundo);
@@ -287,8 +304,14 @@
         
         /* Adiciona media queries para responsividade em dispositivos móveis */
         @media (max-width: 768px) {
-            /* MODIFICADO: Esconde o placar durante o jogo em telas menores */
-            #conteudo-jogo .placar-container {
+            /* MODIFICADO: Esconde apenas acertos e sequência em telas menores */
+            .placar-container {
+               display: grid;
+               grid-template-columns: 1fr 1fr;
+               gap: 10px;
+            }
+
+            .placar-item.mobile-hide {
                 display: none;
             }
 
@@ -317,6 +340,10 @@
             #tela-fim-jogo p {
                 font-size: 1.2rem;
             }
+
+            #feedback-final {
+                font-size: 1.5rem;
+            }
         }
 
     </style>
@@ -327,6 +354,8 @@
         <div id="tela-inicial" class="fade-in">
             <h1>Adivinhe a Bandeira</h1>
             <button id="btn-iniciar" class="btn-principal">Começar Jogo</button>
+            <!-- NOVO: Mensagem de incentivo -->
+            <p class="pix-incentivo">Acerte todas as bandeiras e ganhe um PIX de R$20!</p>
             <p class="creditos">Feito por Pedro Henrique</p>
         </div>
 
@@ -335,20 +364,19 @@
             <h1>Adivinhe a Bandeira</h1>
             
             <div class="placar-container">
-                <div class="placar-item">Acertos: <span id="placar-acertos">0</span></div>
-                <div class="placar-item">Sequência: <span id="placar-streak">0</span></div>
+                <!-- MODIFICADO: Adicionada classe para esconder em mobile -->
+                <div class="placar-item mobile-hide">Acertos: <span id="placar-acertos">0</span></div>
+                <div class="placar-item mobile-hide">Sequência: <span id="placar-streak">0</span></div>
                 <div class="placar-item">Tempo Total: <span id="placar-tempo-total">00:00</span></div>
-                <!-- Novo item do placar para o total de bandeiras -->
                 <div class="placar-item">Total de Bandeiras: <span id="placar-total-bandeiras"></span></div>
             </div>
 
             <div class="timer-container">
                 <div class="circle-timer" id="round-spinner"></div>
-                Tempo Restante: <span id="placar-tempo-rodada">15</span>
+                Tempo Restante: <span id="placar-tempo-rodada">5</span>
             </div>
 
             <div class="bandeira-container">
-                <!-- Alterado de <span> para <img> para usar imagens de bandeiras -->
                 <img id="bandeira" src="" alt="Bandeira do país" onerror="this.onerror=null;this.src='https://placehold.co/320x213/f0f0f0/cccccc?text=Bandeira';">
             </div>
 
@@ -365,11 +393,11 @@
         <!-- Tela de Fim de Jogo -->
         <div id="tela-fim-jogo" class="fade-out">
             <h2>Fim de Jogo!</h2>
+            <p id="feedback-final"></p>
             <p>Seu placar final foi: <span id="placar-final-acertos">0</span> acertos.</p>
             <p>Sua maior sequência foi: <span id="placar-final-streak">0</span>.</p>
             <p>Seu tempo total de jogo foi: <span id="placar-final-tempo">00:00</span>.</p>
             <div class="social-buttons">
-                <!-- Alterado o nome do botão e a função de compartilhamento -->
                 <button id="btn-compartilhar-whatsapp" class="btn-principal">Compartilhar o resultado com Pedro</button>
             </div>
             <button id="btn-reiniciar" class="btn-principal">Jogar Novamente</button>
@@ -379,244 +407,93 @@
     <script>
         // Lógica do jogo em JavaScript
         
-        // --- Dados: Lista de países e seus códigos (para buscar as imagens) ---
-        // A lista foi expandida para incluir mais de 200 países e ilhas
         const bandeiras = [
-            { pais: "Brasil", codigo: "br" },
-            { pais: "Japão", codigo: "jp" },
-            { pais: "Estados Unidos", codigo: "us" },
-            { pais: "Canadá", codigo: "ca" },
-            { pais: "Austrália", codigo: "au" },
-            { pais: "Alemanha", codigo: "de" },
-            { pais: "França", codigo: "fr" },
-            { pais: "Itália", codigo: "it" },
-            { pais: "Espanha", codigo: "es" },
-            { pais: "Índia", codigo: "in" },
-            { pais: "China", codigo: "cn" },
-            { pais: "Rússia", codigo: "ru" },
-            { pais: "México", codigo: "mx" },
-            { pais: "Egito", codigo: "eg" },
-            { pais: "África do Sul", codigo: "za" },
-            { pais: "Argentina", codigo: "ar" },
-            { pais: "Coreia do Sul", codigo: "kr" },
-            { pais: "Reino Unido", codigo: "gb" },
-            { pais: "Portugal", codigo: "pt" },
-            { pais: "Suíça", codigo: "ch" },
-            { pais: "Tailândia", codigo: "th" },
-            { pais: "Turquia", codigo: "tr" },
-            { pais: "Grécia", codigo: "gr" },
-            { pais: "Noruega", codigo: "no" },
-            { pais: "Suécia", codigo: "se" },
-            { pais: "Finlândia", codigo: "fi" },
-            { pais: "Holanda", codigo: "nl" },
-            { pais: "Bélgica", codigo: "be" },
-            { pais: "Irlanda", codigo: "ie" },
-            { pais: "Nova Zelândia", codigo: "nz" },
-            { pais: "Chile", codigo: "cl" },
-            { pais: "Colômbia", codigo: "co" },
-            { pais: "Peru", codigo: "pe" },
-            { pais: "Venezuela", codigo: "ve" },
-            { pais: "Cuba", codigo: "cu" },
-            { pais: "Marrocos", codigo: "ma" },
-            { pais: "Nigéria", codigo: "ng" },
-            { pais: "Quênia", codigo: "ke" },
-            { pais: "Vietnã", codigo: "vn" },
-            { pais: "Paquistão", codigo: "pk" },
-            { pais: "Indonésia", codigo: "id" },
-            { pais: "Malásia", codigo: "my" },
-            { pais: "Filipinas", codigo: "ph" },
-            { pais: "Arábia Saudita", codigo: "sa" },
-            { pais: "Israel", codigo: "il" },
-            { pais: "Emirados Árabes Unidos", codigo: "ae" },
-            { pais: "Catar", codigo: "qa" },
-            { pais: "Iraque", codigo: "iq" },
-            { pais: "Irã", codigo: "ir" },
-            { pais: "Afeganistão", codigo: "af" },
-            { pais: "Ucrânia", codigo: "ua" },
-            { pais: "Polônia", codigo: "pl" },
-            { pais: "Romênia", codigo: "ro" },
-            { pais: "Hungria", codigo: "hu" },
-            { pais: "República Tcheca", codigo: "cz" },
-            { pais: "Áustria", codigo: "at" },
-            { pais: "Bulgária", codigo: "bg" },
-            { pais: "Croácia", codigo: "hr" },
-            { pais: "Bósnia e Herzegovina", codigo: "ba" },
-            { pais: "Sérvia", codigo: "rs" },
-            { pais: "Eslováquia", codigo: "sk" },
-            { pais: "Eslovênia", codigo: "si" },
-            { pais: "Estônia", codigo: "ee" },
-            { pais: "Letônia", codigo: "lv" },
-            { pais: "Lituânia", codigo: "lt" },
-            { pais: "Belarus", codigo: "by" },
-            { pais: "Moldávia", codigo: "md" },
-            { pais: "Albânia", codigo: "al" },
-            { pais: "Macedônia do Norte", codigo: "mk" },
-            { pais: "Montenegro", codigo: "me" },
-            { pais: "Kosovo", codigo: "xk" },
-            { pais: "Chipre", codigo: "cy" },
-            { pais: "Malta", codigo: "mt" },
-            { pais: "Islândia", codigo: "is" },
-            { pais: "Gana", codigo: "gh" },
-            { pais: "Senegal", codigo: "sn" },
-            { pais: "Cabo Verde", codigo: "cv" },
-            { pais: "Etiópia", codigo: "et" },
-            { pais: "Somália", codigo: "so" },
-            { pais: "Uganda", codigo: "ug" },
-            { pais: "Tanzânia", codigo: "tz" },
-            { pais: "Angola", codigo: "ao" },
-            { pais: "Moçambique", codigo: "mz" },
-            { pais: "Congo", codigo: "cg" },
-            { pais: "Nigéria", codigo: "ng" },
-            { pais: "Camarões", codigo: "cm" },
-            { pais: "Argélia", codigo: "dz" },
-            { pais: "Líbia", codigo: "ly" },
-            { pais: "Sudão", codigo: "sd" },
-            { pais: "Tunísia", codigo: "tn" },
-            { pais: "Mauritânia", codigo: "mr" },
-            { pais: "Mali", codigo: "ml" },
-            { pais: "Níger", codigo: "ne" },
-            { pais: "Chade", codigo: "td" },
-            { pais: "Eritreia", codigo: "er" },
-            { pais: "Djibuti", codigo: "dj" },
-            { pais: "Guiné-Bissau", codigo: "gw" },
-            { pais: "Guiné", codigo: "gn" },
-            { pais: "Serra Leoa", codigo: "sl" },
-            { pais: "Libéria", codigo: "lr" },
-            { pais: "Costa do Marfim", codigo: "ci" },
-            { pais: "Burkina Faso", codigo: "bf" },
-            { pais: "Togo", codigo: "tg" },
-            { pais: "Benin", codigo: "bj" },
-            { pais: "Guiné Equatorial", codigo: "gq" },
-            { pais: "Gabão", codigo: "ga" },
-            { pais: "República Centro-Africana", codigo: "cf" },
-            { pais: "Ruanda", codigo: "rw" },
-            { pais: "Burundi", codigo: "bi" },
-            { pais: "Zâmbia", codigo: "zm" },
-            { pais: "Zimbábue", codigo: "zw" },
-            { pais: "Namíbia", codigo: "na" },
-            { pais: "Botsuana", codigo: "bw" },
-            { pais: "Lesoto", codigo: "ls" },
-            { pais: "Essuatíni", codigo: "sz" },
-            { pais: "Madagáscar", codigo: "mg" },
-            { pais: "Seicheles", codigo: "sc" },
-            { pais: "Comores", codigo: "km" },
-            { pais: "Maurícia", codigo: "mu" },
-            { pais: "Myanmar", codigo: "mm" },
-            { pais: "Laos", codigo: "la" },
-            { pais: "Camboja", codigo: "kh" },
-            { pais: "Singapura", codigo: "sg" },
-            { pais: "Brunei", codigo: "bn" },
-            { pais: "Timor-Leste", codigo: "tl" },
-            { pais: "Papua-Nova Guiné", codigo: "pg" },
-            { pais: "Ilhas Salomão", codigo: "sb" },
-            { pais: "Vanuatu", codigo: "vu" },
-            { pais: "Fiji", codigo: "fj" },
-            { pais: "Tonga", codigo: "to" },
-            { pais: "Samoa", codigo: "ws" },
-            { pais: "Kiribati", codigo: "ki" },
-            { pais: "Tuvalu", codigo: "tv" },
-            { pais: "Ilhas Marshall", codigo: "mh" },
-            { pais: "Micronésia", codigo: "fm" },
-            { pais: "Nauru", codigo: "nr" },
-            { pais: "Palau", codigo: "pw" },
-            { pais: "Afeganistão", codigo: "af" },
-            { pais: "Armênia", codigo: "am" },
-            { pais: "Azerbaijão", codigo: "az" },
-            { pais: "Bahrein", codigo: "bh" },
-            { pais: "Bangladesh", codigo: "bd" },
-            { pais: "Butão", codigo: "bt" },
-            { pais: "Geórgia", codigo: "ge" },
-            { pais: "Iêmen", codigo: "ye" },
-            { pais: "Jordânia", codigo: "jo" },
-            { pais: "Cazaquistão", codigo: "kz" },
-            { pais: "Kuwait", codigo: "kw" },
-            { pais: "Líbano", codigo: "lb" },
-            { pais: "Maldivas", codigo: "mv" },
-            { pais: "Mongólia", codigo: "mn" },
-            { pais: "Nepal", codigo: "np" },
-            { pais: "Omã", codigo: "om" },
-            { pais: "Palestina", codigo: "ps" },
-            { pais: "Síria", codigo: "sy" },
-            { pais: "Tadjiquistão", codigo: "tj" },
-            { pais: "Turquemenistão", codigo: "tm" },
-            { pais: "Uzbequistão", codigo: "uz" },
-            { pais: "Antígua e Barbuda", codigo: "ag" },
-            { pais: "Bahamas", codigo: "bs" },
-            { pais: "Barbados", codigo: "bb" },
-            { pais: "Belize", codigo: "bz" },
-            { pais: "Costa Rica", codigo: "cr" },
-            { pais: "Dominica", codigo: "dm" },
-            { pais: "El Salvador", codigo: "sv" },
-            { pais: "Granada", codigo: "gd" },
-            { pais: "Guatemala", codigo: "gt" },
-            { pais: "Haiti", codigo: "ht" },
-            { pais: "Honduras", codigo: "hn" },
-            { pais: "Jamaica", codigo: "jm" },
-            { pais: "Nicarágua", codigo: "ni" },
-            { pais: "Panamá", codigo: "pa" },
-            { pais: "República Dominicana", codigo: "do" },
-            { pais: "São Cristóvão e Neves", codigo: "kn" },
-            { pais: "São Vicente e Granadinas", codigo: "vc" },
-            { pais: "Santa Lúcia", codigo: "lc" },
-            { pais: "Trindade e Tobago", codigo: "tt" },
-            { pais: "Andorra", codigo: "ad" },
-            { pais: "Liechtenstein", codigo: "li" },
-            { pais: "Mônaco", codigo: "mc" },
-            { pais: "São Marino", codigo: "sm" },
-            { pais: "Cidade do Vaticano", codigo: "va" },
-            { pais: "Senegal", codigo: "sn" },
-            { pais: "Gâmbia", codigo: "gm" },
-            { pais: "Mauritânia", codigo: "mr" },
-            { pais: "Saara Ocidental", codigo: "eh" },
-            { pais: "Burkina Faso", codigo: "bf" },
-            { pais: "Costa do Marfim", codigo: "ci" },
-            { pais: "Togo", codigo: "tg" },
-            { pais: "Benin", codigo: "bj" },
-            { pais: "Malta", codigo: "mt" },
-            { pais: "Kuwait", codigo: "kw" },
-            { pais: "Filipinas", codigo: "ph" },
-            { pais: "Malásia", codigo: "my" },
-            { pais: "Aruba", codigo: "aw" },
-            { pais: "Curaçau", codigo: "cw" },
-            { pais: "Ilhas Cayman", codigo: "ky" },
-            { pais: "Bermudas", codigo: "bm" },
-            { pais: "Ilhas Virgens Britânicas", codigo: "vg" },
-            { pais: "Gibraltar", codigo: "gi" },
-            { pais: "Groenlândia", codigo: "gl" },
-            { pais: "Guiana Francesa", codigo: "gf" },
-            { pais: "Reunião", codigo: "re" },
-            { pais: "Nova Caledônia", codigo: "nc" },
-            { pais: "Ilhas Faroé", codigo: "fo" },
-            { pais: "Guam", codigo: "gu" },
-            { pais: "Ilhas Cook", codigo: "ck" },
-            { pais: "Samoa Americana", codigo: "as" },
-            { pais: "Wallis e Futuna", codigo: "wf" },
-            { pais: "Tokelau", codigo: "tk" },
-            { pais: "Niue", codigo: "nu" },
-            { pais: "São Tomé e Príncipe", codigo: "st" },
-            { pais: "Dominica", codigo: "dm" },
-            { pais: "São Bartolomeu", codigo: "bl" },
-            { pais: "São Martinho (lado francês)", codigo: "mf" },
-            { pais: "São Pedro e Miquelão", codigo: "pm" },
-            { pais: "Território Britânico do Oceano Índico", codigo: "io" },
-            { pais: "Ilhas Virgens Americanas", codigo: "vi" },
-            { pais: "Ilhas Turcas e Caicos", codigo: "tc" }
+            { pais: "Brasil", codigo: "br" }, { pais: "Japão", codigo: "jp" }, { pais: "Estados Unidos", codigo: "us" },
+            { pais: "Canadá", codigo: "ca" }, { pais: "Austrália", codigo: "au" }, { pais: "Alemanha", codigo: "de" },
+            { pais: "França", codigo: "fr" }, { pais: "Itália", codigo: "it" }, { pais: "Espanha", codigo: "es" },
+            { pais: "Índia", codigo: "in" }, { pais: "China", codigo: "cn" }, { pais: "Rússia", codigo: "ru" },
+            { pais: "México", codigo: "mx" }, { pais: "Egito", codigo: "eg" }, { pais: "África do Sul", codigo: "za" },
+            { pais: "Argentina", codigo: "ar" }, { pais: "Coreia do Sul", codigo: "kr" }, { pais: "Reino Unido", codigo: "gb" },
+            { pais: "Portugal", codigo: "pt" }, { pais: "Suíça", codigo: "ch" }, { pais: "Tailândia", codigo: "th" },
+            { pais: "Turquia", codigo: "tr" }, { pais: "Grécia", codigo: "gr" }, { pais: "Noruega", codigo: "no" },
+            { pais: "Suécia", codigo: "se" }, { pais: "Finlândia", codigo: "fi" }, { pais: "Holanda", codigo: "nl" },
+            { pais: "Bélgica", codigo: "be" }, { pais: "Irlanda", codigo: "ie" }, { pais: "Nova Zelândia", codigo: "nz" },
+            { pais: "Chile", codigo: "cl" }, { pais: "Colômbia", codigo: "co" }, { pais: "Peru", codigo: "pe" },
+            { pais: "Venezuela", codigo: "ve" }, { pais: "Cuba", codigo: "cu" }, { pais: "Marrocos", codigo: "ma" },
+            { pais: "Nigéria", codigo: "ng" }, { pais: "Quênia", codigo: "ke" }, { pais: "Vietnã", codigo: "vn" },
+            { pais: "Paquistão", codigo: "pk" }, { pais: "Indonésia", codigo: "id" }, { pais: "Malásia", codigo: "my" },
+            { pais: "Filipinas", codigo: "ph" }, { pais: "Arábia Saudita", codigo: "sa" }, { pais: "Israel", codigo: "il" },
+            { pais: "Emirados Árabes Unidos", codigo: "ae" }, { pais: "Catar", codigo: "qa" }, { pais: "Iraque", codigo: "iq" },
+            { pais: "Irã", codigo: "ir" }, { pais: "Afeganistão", codigo: "af" }, { pais: "Ucrânia", codigo: "ua" },
+            { pais: "Polônia", codigo: "pl" }, { pais: "Romênia", codigo: "ro" }, { pais: "Hungria", codigo: "hu" },
+            { pais: "República Tcheca", codigo: "cz" }, { pais: "Áustria", codigo: "at" }, { pais: "Bulgária", codigo: "bg" },
+            { pais: "Croácia", codigo: "hr" }, { pais: "Bósnia e Herzegovina", codigo: "ba" }, { pais: "Sérvia", codigo: "rs" },
+            { pais: "Eslováquia", codigo: "sk" }, { pais: "Eslovênia", codigo: "si" }, { pais: "Estônia", codigo: "ee" },
+            { pais: "Letônia", codigo: "lv" }, { pais: "Lituânia", codigo: "lt" }, { pais: "Belarus", codigo: "by" },
+            { pais: "Moldávia", codigo: "md" }, { pais: "Albânia", codigo: "al" }, { pais: "Macedônia do Norte", codigo: "mk" },
+            { pais: "Montenegro", codigo: "me" }, { pais: "Kosovo", codigo: "xk" }, { pais: "Chipre", codigo: "cy" },
+            { pais: "Malta", codigo: "mt" }, { pais: "Islândia", codigo: "is" }, { pais: "Gana", codigo: "gh" },
+            { pais: "Senegal", codigo: "sn" }, { pais: "Cabo Verde", codigo: "cv" }, { pais: "Etiópia", codigo: "et" },
+            { pais: "Somália", codigo: "so" }, { pais: "Uganda", codigo: "ug" }, { pais: "Tanzânia", codigo: "tz" },
+            { pais: "Angola", codigo: "ao" }, { pais: "Moçambique", codigo: "mz" }, { pais: "Congo", codigo: "cg" },
+            { pais: "Nigéria", codigo: "ng" }, { pais: "Camarões", codigo: "cm" }, { pais: "Argélia", codigo: "dz" },
+            { pais: "Líbia", codigo: "ly" }, { pais: "Sudão", codigo: "sd" }, { pais: "Tunísia", codigo: "tn" },
+            { pais: "Mauritânia", codigo: "mr" }, { pais: "Mali", codigo: "ml" }, { pais: "Níger", codigo: "ne" },
+            { pais: "Chade", codigo: "td" }, { pais: "Eritreia", codigo: "er" }, { pais: "Djibuti", codigo: "dj" },
+            { pais: "Guiné-Bissau", codigo: "gw" }, { pais: "Guiné", codigo: "gn" }, { pais: "Serra Leoa", codigo: "sl" },
+            { pais: "Libéria", codigo: "lr" }, { pais: "Costa do Marfim", codigo: "ci" }, { pais: "Burkina Faso", codigo: "bf" },
+            { pais: "Togo", codigo: "tg" }, { pais: "Benin", codigo: "bj" }, { pais: "Guiné Equatorial", codigo: "gq" },
+            { pais: "Gabão", codigo: "ga" }, { pais: "República Centro-Africana", codigo: "cf" }, { pais: "Ruanda", codigo: "rw" },
+            { pais: "Burundi", codigo: "bi" }, { pais: "Zâmbia", codigo: "zm" }, { pais: "Zimbábue", codigo: "zw" },
+            { pais: "Namíbia", codigo: "na" }, { pais: "Botsuana", codigo: "bw" }, { pais: "Lesoto", codigo: "ls" },
+            { pais: "Essuatíni", codigo: "sz" }, { pais: "Madagáscar", codigo: "mg" }, { pais: "Seicheles", codigo: "sc" },
+            { pais: "Comores", codigo: "km" }, { pais: "Maurícia", codigo: "mu" }, { pais: "Myanmar", codigo: "mm" },
+            { pais: "Laos", codigo: "la" }, { pais: "Camboja", codigo: "kh" }, { pais: "Singapura", codigo: "sg" },
+            { pais: "Brunei", codigo: "bn" }, { pais: "Timor-Leste", codigo: "tl" }, { pais: "Papua-Nova Guiné", codigo: "pg" },
+            { pais: "Ilhas Salomão", codigo: "sb" }, { pais: "Vanuatu", codigo: "vu" }, { pais: "Fiji", codigo: "fj" },
+            { pais: "Tonga", codigo: "to" }, { pais: "Samoa", codigo: "ws" }, { pais: "Kiribati", codigo: "ki" },
+            { pais: "Tuvalu", codigo: "tv" }, { pais: "Ilhas Marshall", codigo: "mh" }, { pais: "Micronésia", codigo: "fm" },
+            { pais: "Nauru", codigo: "nr" }, { pais: "Palau", codigo: "pw" }, { pais: "Afeganistão", codigo: "af" },
+            { pais: "Armênia", codigo: "am" }, { pais: "Azerbaijão", codigo: "az" }, { pais: "Bahrein", codigo: "bh" },
+            { pais: "Bangladesh", codigo: "bd" }, { pais: "Butão", codigo: "bt" }, { pais: "Geórgia", codigo: "ge" },
+            { pais: "Iêmen", codigo: "ye" }, { pais: "Jordânia", codigo: "jo" }, { pais: "Cazaquistão", codigo: "kz" },
+            { pais: "Kuwait", codigo: "kw" }, { pais: "Líbano", codigo: "lb" }, { pais: "Maldivas", codigo: "mv" },
+            { pais: "Mongólia", codigo: "mn" }, { pais: "Nepal", codigo: "np" }, { pais: "Omã", codigo: "om" },
+            { pais: "Palestina", codigo: "ps" }, { pais: "Síria", codigo: "sy" }, { pais: "Tadjiquistão", codigo: "tj" },
+            { pais: "Turquemenistão", codigo: "tm" }, { pais: "Uzbequistão", codigo: "uz" }, { pais: "Antígua e Barbuda", codigo: "ag" },
+            { pais: "Bahamas", codigo: "bs" }, { pais: "Barbados", codigo: "bb" }, { pais: "Belize", codigo: "bz" },
+            { pais: "Costa Rica", codigo: "cr" }, { pais: "Dominica", codigo: "dm" }, { pais: "El Salvador", codigo: "sv" },
+            { pais: "Granada", codigo: "gd" }, { pais: "Guatemala", codigo: "gt" }, { pais: "Haiti", codigo: "ht" },
+            { pais: "Honduras", codigo: "hn" }, { pais: "Jamaica", codigo: "jm" }, { pais: "Nicarágua", codigo: "ni" },
+            { pais: "Panamá", codigo: "pa" }, { pais: "República Dominicana", codigo: "do" }, { pais: "São Cristóvão e Neves", codigo: "kn" },
+            { pais: "São Vicente e Granadinas", codigo: "vc" }, { pais: "Santa Lúcia", codigo: "lc" }, { pais: "Trindade e Tobago", codigo: "tt" },
+            { pais: "Andorra", codigo: "ad" }, { pais: "Liechtenstein", codigo: "li" }, { pais: "Mônaco", codigo: "mc" },
+            { pais: "São Marino", codigo: "sm" }, { pais: "Cidade do Vaticano", codigo: "va" }, { pais: "Senegal", codigo: "sn" },
+            { pais: "Gâmbia", codigo: "gm" }, { pais: "Mauritânia", codigo: "mr" }, { pais: "Saara Ocidental", codigo: "eh" },
+            { pais: "Burkina Faso", codigo: "bf" }, { pais: "Costa do Marfim", codigo: "ci" }, { pais: "Togo", codigo: "tg" },
+            { pais: "Benin", codigo: "bj" }, { pais: "Malta", codigo: "mt" }, { pais: "Kuwait", codigo: "kw" },
+            { pais: "Filipinas", codigo: "ph" }, { pais: "Malásia", codigo: "my" }, { pais: "Aruba", codigo: "aw" },
+            { pais: "Curaçau", codigo: "cw" }, { pais: "Ilhas Cayman", codigo: "ky" }, { pais: "Bermudas", codigo: "bm" },
+            { pais: "Ilhas Virgens Britânicas", codigo: "vg" }, { pais: "Gibraltar", codigo: "gi" }, { pais: "Groenlândia", codigo: "gl" },
+            { pais: "Guiana Francesa", codigo: "gf" }, { pais: "Reunião", codigo: "re" }, { pais: "Nova Caledônia", codigo: "nc" },
+            { pais: "Ilhas Faroé", codigo: "fo" }, { pais: "Guam", codigo: "gu" }, { pais: "Ilhas Cook", codigo: "ck" },
+            { pais: "Samoa Americana", codigo: "as" }, { pais: "Wallis e Futuna", codigo: "wf" }, { pais: "Tokelau", codigo: "tk" },
+            { pais: "Niue", codigo: "nu" }, { pais: "São Tomé e Príncipe", codigo: "st" }, { pais: "Dominica", codigo: "dm" },
+            { pais: "São Bartolomeu", codigo: "bl" }, { pais: "São Martinho (lado francês)", codigo: "mf" }, { pais: "São Pedro e Miquelão", codigo: "pm" },
+            { pais: "Território Britânico do Oceano Índico", codigo: "io" }, { pais: "Ilhas Virgens Americanas", codigo: "vi" }, { pais: "Ilhas Turcas e Caicos", codigo: "tc" }
         ];
 
         // --- Variáveis de Estado do Jogo ---
         let placarAcertos = 0;
         let sequenciaAcertos = 0;
         let maiorSequencia = 0;
-        let tempoRestanteRodada = 15;
+        let tempoRestanteRodada = 5; // MODIFICADO: Tempo da rodada alterado para 5 segundos
         let tempoTotalJogo = 0;
         let timerRodada;
         let timerJogo;
         let bandeiraAtual;
         let opcoesBotoes;
         let jogoAtivo = false;
-        
-        // As rodadas não são mais contadas, pois o jogo termina no primeiro erro.
-        // A variável totalRodadas foi removida.
 
         // --- Referências aos Elementos do DOM ---
         const telaInicial = document.getElementById('tela-inicial');
@@ -640,10 +517,10 @@
         const placarFinalAcertosElemento = document.getElementById('placar-final-acertos');
         const placarFinalStreakElemento = document.getElementById('placar-final-streak');
         const placarFinalTempoElemento = document.getElementById('placar-final-tempo');
+        const feedbackFinalElemento = document.getElementById('feedback-final');
 
         // --- Funções do Jogo ---
 
-        // Função principal para iniciar o jogo
         function iniciarJogo() {
             jogoAtivo = true;
             placarAcertos = 0;
@@ -651,10 +528,8 @@
             maiorSequencia = 0;
             tempoTotalJogo = 0;
             
-            // Atualiza os placares iniciais
             atualizarPlacar();
 
-            // Mostra o conteúdo do jogo e esconde as telas
             telaInicial.classList.remove('fade-in');
             telaInicial.classList.add('fade-out');
             conteudoJogo.classList.remove('fade-out');
@@ -662,52 +537,41 @@
             telaFimJogo.classList.remove('fade-in');
             telaFimJogo.classList.add('fade-out');
 
-            // Inicia o cronômetro do jogo e a primeira rodada
             iniciarCronometroJogo();
             proximaRodada();
         }
 
-        // Função para iniciar a próxima rodada
         function proximaRodada() {
-            // Reseta o tempo da rodada
-            tempoRestanteRodada = 15;
+            tempoRestanteRodada = 5; // MODIFICADO: Tempo da rodada resetado para 5 segundos
             placarTempoRodadaElemento.textContent = tempoRestanteRodada;
             roundSpinner.style.display = 'block';
 
-            // Limpa o feedback anterior
             feedbackMensagem.textContent = '';
             feedbackMensagem.className = 'feedback';
 
-            // Habilita e limpa as classes dos botões
             opcoesBotoes = Array.from(opcoesContainer.children);
             opcoesBotoes.forEach(btn => {
                 btn.disabled = false;
-                btn.className = 'opcao-btn'; // CORRIGIDO: Garante que os botões sejam resetados
+                btn.className = 'opcao-btn';
             });
             
-            // Seleciona uma bandeira aleatória
             const bandeiraCorreta = bandeiras[Math.floor(Math.random() * bandeiras.length)];
             bandeiraAtual = bandeiraCorreta;
 
-            // Seleciona 3 opções incorretas aleatórias
             const opcoesIncorretas = selecionarOpcoesIncorretas(bandeiraCorreta.pais, 3);
             const opcoesParaExibir = [bandeiraCorreta.pais, ...opcoesIncorretas];
             
-            // Embaralha as opções
             embaralharArray(opcoesParaExibir);
             
-            // Exibe a bandeira e as opções
             bandeiraElemento.src = `https://flagcdn.com/w320/${bandeiraAtual.codigo}.png`;
             bandeiraElemento.alt = `Bandeira do(a) ${bandeiraAtual.pais}`;
             opcoesBotoes.forEach((btn, index) => {
                 btn.textContent = opcoesParaExibir[index];
             });
 
-            // Inicia o cronômetro da rodada
             iniciarCronometroRodada();
         }
 
-        // Função para selecionar opções incorretas de forma aleatória
         function selecionarOpcoesIncorretas(paisCorreto, quantidade) {
             const opcoes = bandeiras.map(b => b.pais).filter(p => p !== paisCorreto);
             const opcoesAleatorias = [];
@@ -722,7 +586,6 @@
             return opcoesAleatorias;
         }
 
-        // Função para embaralhar um array (algoritmo Fisher-Yates)
         function embaralharArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -730,25 +593,21 @@
             }
         }
 
-        // Função para verificar a resposta do jogador
         function verificarResposta(event) {
             if (!jogoAtivo) return;
 
             const botaoClicado = event.target;
             if (!botaoClicado.classList.contains('opcao-btn')) return;
 
-            // Para o cronômetro da rodada
             clearInterval(timerRodada);
             roundSpinner.style.display = 'none';
 
-            // Desabilita todos os botões após a resposta
             opcoesBotoes.forEach(btn => btn.disabled = true);
             
             const resposta = botaoClicado.textContent;
             const respostaCorreta = bandeiraAtual.pais;
 
             if (resposta === respostaCorreta) {
-                // Resposta correta: continua o jogo
                 placarAcertos++;
                 sequenciaAcertos++;
                 if (sequenciaAcertos > maiorSequencia) {
@@ -757,14 +616,11 @@
                 botaoClicado.classList.add('correta');
                 feedbackMensagem.textContent = 'Correto!';
                 feedbackMensagem.classList.add('acerto');
-                // Chama a próxima rodada após um pequeno delay
-                setTimeout(proximaRodada, 2000);
+                setTimeout(proximaRodada, 1500);
             } else {
-                // Resposta incorreta: Fim do jogo
                 sequenciaAcertos = 0;
                 botaoClicado.classList.add('incorreta');
                 
-                // Encontra e destaca o botão correto
                 const botaoCorreto = opcoesBotoes.find(btn => btn.textContent === respostaCorreta);
                 if (botaoCorreto) {
                     botaoCorreto.classList.add('correta');
@@ -773,33 +629,28 @@
                 feedbackMensagem.textContent = 'Errado! A resposta era ' + respostaCorreta + '.';
                 feedbackMensagem.classList.add('erro');
 
-                // Fim do jogo após um pequeno delay
                 setTimeout(fimDeJogo, 2000);
             }
 
             atualizarPlacar();
         }
 
-        // Função para atualizar os placares na UI
         function atualizarPlacar() {
             placarAcertosElemento.textContent = placarAcertos;
             placarStreakElemento.textContent = sequenciaAcertos;
         }
 
-        // Função para iniciar o cronômetro da rodada
         function iniciarCronometroRodada() {
             timerRodada = setInterval(() => {
                 tempoRestanteRodada--;
                 placarTempoRodadaElemento.textContent = tempoRestanteRodada;
 
                 if (tempoRestanteRodada <= 0) {
-                    // Tempo esgotado: Fim do jogo
                     clearInterval(timerRodada);
                     roundSpinner.style.display = 'none';
-                    sequenciaAcertos = 0; // Zera a sequência
+                    sequenciaAcertos = 0;
                     atualizarPlacar();
                     
-                    // Mostra a resposta correta
                     const respostaCorreta = bandeiraAtual.pais;
                     const botaoCorreto = opcoesBotoes.find(btn => btn.textContent === respostaCorreta);
                     if (botaoCorreto) {
@@ -811,13 +662,11 @@
                     
                     opcoesBotoes.forEach(btn => btn.disabled = true);
                     
-                    // Fim do jogo após um pequeno delay
                     setTimeout(fimDeJogo, 2000);
                 }
             }, 1000);
         }
 
-        // Função para iniciar o cronômetro total do jogo
         function iniciarCronometroJogo() {
             let segundos = 0;
             timerJogo = setInterval(() => {
@@ -830,14 +679,27 @@
             }, 1000);
         }
 
-        // Função para finalizar o jogo e mostrar a tela de resultados
+        function obterFeedbackFinal(acertos) {
+            if (acertos === bandeiras.length) {
+                return "Parabéns! Você acertou todas e ganhou o PIX!";
+            }
+            if (acertos < 5) {
+                return "Precisa estudar mais as bandeiras!";
+            } else if (acertos < 10) {
+                return "Nada mal, mas pode melhorar!";
+            } else if (acertos < 20) {
+                return "Bom trabalho! Você conhece bastante.";
+            } else {
+                return "Excelente! Você é um mestre das bandeiras!";
+            }
+        }
+
         function fimDeJogo() {
             jogoAtivo = false;
             clearInterval(timerRodada);
             clearInterval(timerJogo);
             roundSpinner.style.display = 'none';
 
-            // Atualiza o placar final
             placarFinalAcertosElemento.textContent = placarAcertos;
             placarFinalStreakElemento.textContent = maiorSequencia;
             
@@ -846,39 +708,34 @@
             placarFinalTempoElemento.textContent = 
                 `${String(minutos).padStart(2, '0')}:${String(segundosRestantes).padStart(2, '0')}`;
 
-            // Esconde o conteúdo do jogo e mostra a tela final
+            feedbackFinalElemento.textContent = obterFeedbackFinal(placarAcertos);
+
             conteudoJogo.classList.remove('fade-in');
             conteudoJogo.classList.add('fade-out');
             telaFimJogo.classList.remove('fade-out');
             telaFimJogo.classList.add('fade-in');
         }
 
-        // Função para reiniciar o jogo
         function reiniciarJogo() {
-            // Volta para a tela inicial
             telaFimJogo.classList.remove('fade-in');
             telaFimJogo.classList.add('fade-out');
             telaInicial.classList.remove('fade-out');
             telaInicial.classList.add('fade-in');
         }
         
-        // Função para compartilhar o resultado no WhatsApp
         function compartilharComPedro() {
-            // IMPORTANTE: Adicione seu número de telefone com o código do país aqui. Ex: 5511999999999
-            const numeroTelefone = '5534988301561'; 
-            const mensagem = `Adivinhe a Bandeira - Meu resultado:\nAcertos: ${placarAcertos}\nTempo Total: ${placarFinalTempoElemento.textContent}\nMinha maior sequência: ${maiorSequencia}`;
+            const numeroTelefone = 'ADICIONE_SEU_NUMERO_AQUI'; 
+            const mensagem = `Meu resultado no Adivinhe a Bandeira:\n\nAcertos: ${placarAcertos}\nTempo Total: ${placarFinalTempoElemento.textContent}`;
             const url = `https://api.whatsapp.com/send?phone=${numeroTelefone}&text=${encodeURIComponent(mensagem)}`;
             window.open(url, '_blank');
         }
 
-        // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
             btnIniciar.addEventListener('click', iniciarJogo);
             btnReiniciar.addEventListener('click', reiniciarJogo);
             opcoesContainer.addEventListener('click', verificarResposta);
             btnCompartilharWhatsApp.addEventListener('click', compartilharComPedro);
             
-            // Adiciona o total de bandeiras ao placar
             placarTotalBandeirasElemento.textContent = bandeiras.length;
         });
     </script>
