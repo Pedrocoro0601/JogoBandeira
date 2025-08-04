@@ -295,6 +295,28 @@
             .opcoes {
                 grid-template-columns: 1fr;
             }
+
+            /* NOVO: Reduz o tamanho da fonte em telas menores */
+            h1 {
+                font-size: 2rem;
+            }
+
+            .opcoes button {
+                font-size: 1rem;
+                padding: 12px 20px;
+            }
+
+            .feedback {
+                font-size: 1.2rem;
+            }
+
+            #tela-fim-jogo h2 {
+                font-size: 2rem;
+            }
+
+            #tela-fim-jogo p {
+                font-size: 1.2rem;
+            }
         }
 
     </style>
@@ -660,7 +682,7 @@
             opcoesBotoes = Array.from(opcoesContainer.children);
             opcoesBotoes.forEach(btn => {
                 btn.disabled = false;
-                btn.className = 'opcao-btn';
+                btn.className = 'opcao-btn'; // CORRIGIDO: Garante que os botões sejam resetados
             });
             
             // Seleciona uma bandeira aleatória
@@ -842,8 +864,8 @@
         
         // Função para compartilhar o resultado no WhatsApp
         function compartilharComPedro() {
-            // Substitua 'SEU_NUMERO' pelo número de telefone de Pedro, incluindo o código do país.
-            const numeroTelefone = 'SEU_NUMERO'; 
+            // IMPORTANTE: Adicione seu número de telefone com o código do país aqui. Ex: 5511999999999
+            const numeroTelefone = '5534988301561'; 
             const mensagem = `Adivinhe a Bandeira - Meu resultado:\nAcertos: ${placarAcertos}\nTempo Total: ${placarFinalTempoElemento.textContent}\nMinha maior sequência: ${maiorSequencia}`;
             const url = `https://api.whatsapp.com/send?phone=${numeroTelefone}&text=${encodeURIComponent(mensagem)}`;
             window.open(url, '_blank');
