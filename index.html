@@ -67,13 +67,17 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* NOVO: Estilo para a mensagem de incentivo */
+        /* Estilo para a mensagem de incentivo */
         .pix-incentivo {
             color: #ffeb3b; /* Amarelo para destaque */
             font-weight: bold;
             font-size: 1.1rem;
             margin-top: 15px;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+        
+        .pix-incentivo .pix-valor {
+            color: #ff4d4d; /* Vermelho */
         }
         
         @media print {
@@ -259,7 +263,6 @@
             font-size: 1.5rem;
         }
 
-        /* NOVO: Estilo para o feedback final */
         #feedback-final {
             font-size: 1.8rem;
             color: var(--cor-principal);
@@ -304,7 +307,6 @@
         
         /* Adiciona media queries para responsividade em dispositivos móveis */
         @media (max-width: 768px) {
-            /* MODIFICADO: Esconde apenas acertos e sequência em telas menores */
             .placar-container {
                display: grid;
                grid-template-columns: 1fr 1fr;
@@ -319,7 +321,6 @@
                 grid-template-columns: 1fr;
             }
 
-            /* NOVO: Reduz o tamanho da fonte em telas menores */
             h1 {
                 font-size: 2rem;
             }
@@ -354,8 +355,7 @@
         <div id="tela-inicial" class="fade-in">
             <h1>Adivinhe a Bandeira</h1>
             <button id="btn-iniciar" class="btn-principal">Começar Jogo</button>
-            <!-- NOVO: Mensagem de incentivo -->
-            <p class="pix-incentivo">Acerte todas as bandeiras e ganhe um PIX de R$20!</p>
+            <p class="pix-incentivo">Acerte todas as bandeiras e ganhe um <span class="pix-valor">PIX de R$20!</span></p>
             <p class="creditos">Feito por Pedro Henrique</p>
         </div>
 
@@ -364,11 +364,10 @@
             <h1>Adivinhe a Bandeira</h1>
             
             <div class="placar-container">
-                <!-- MODIFICADO: Adicionada classe para esconder em mobile -->
                 <div class="placar-item mobile-hide">Acertos: <span id="placar-acertos">0</span></div>
                 <div class="placar-item mobile-hide">Sequência: <span id="placar-streak">0</span></div>
                 <div class="placar-item">Tempo Total: <span id="placar-tempo-total">00:00</span></div>
-                <div class="placar-item">Total de Bandeiras: <span id="placar-total-bandeiras"></span></div>
+                <div class="placar-item">Total de Bandeiras: <span id="placar-total-bandeiras">0/219</span></div>
             </div>
 
             <div class="timer-container">
@@ -487,7 +486,7 @@
         let placarAcertos = 0;
         let sequenciaAcertos = 0;
         let maiorSequencia = 0;
-        let tempoRestanteRodada = 5; // MODIFICADO: Tempo da rodada alterado para 5 segundos
+        let tempoRestanteRodada = 5;
         let tempoTotalJogo = 0;
         let timerRodada;
         let timerJogo;
@@ -542,7 +541,7 @@
         }
 
         function proximaRodada() {
-            tempoRestanteRodada = 5; // MODIFICADO: Tempo da rodada resetado para 5 segundos
+            tempoRestanteRodada = 5;
             placarTempoRodadaElemento.textContent = tempoRestanteRodada;
             roundSpinner.style.display = 'block';
 
@@ -552,6 +551,7 @@
             opcoesBotoes = Array.from(opcoesContainer.children);
             opcoesBotoes.forEach(btn => {
                 btn.disabled = false;
+                btn.classList.remove('correta', 'incorreta');
                 btn.className = 'opcao-btn';
             });
             
@@ -635,9 +635,11 @@
             atualizarPlacar();
         }
 
+        // MODIFICADO: Função para atualizar todos os placares
         function atualizarPlacar() {
             placarAcertosElemento.textContent = placarAcertos;
             placarStreakElemento.textContent = sequenciaAcertos;
+            placarTotalBandeirasElemento.textContent = `${String(placarAcertos).padStart(2, '0')}/${bandeiras.length}`;
         }
 
         function iniciarCronometroRodada() {
@@ -724,7 +726,7 @@
         }
         
         function compartilharComPedro() {
-            const numeroTelefone = 'ADICIONE_SEU_NUMERO_AQUI'; 
+            const numeroTelefone = '5534988301561'; 
             const mensagem = `Meu resultado no Adivinhe a Bandeira:\n\nAcertos: ${placarAcertos}\nTempo Total: ${placarFinalTempoElemento.textContent}`;
             const url = `https://api.whatsapp.com/send?phone=${numeroTelefone}&text=${encodeURIComponent(mensagem)}`;
             window.open(url, '_blank');
@@ -736,7 +738,8 @@
             opcoesContainer.addEventListener('click', verificarResposta);
             btnCompartilharWhatsApp.addEventListener('click', compartilharComPedro);
             
-            placarTotalBandeirasElemento.textContent = bandeiras.length;
+            // MODIFICADO: Define o estado inicial do placar de bandeiras
+            placarTotalBandeirasElemento.textContent = `0/${bandeiras.length}`;
         });
     </script>
 </body>
