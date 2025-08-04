@@ -361,8 +361,7 @@
 
         <!-- Conteúdo principal do jogo, aparece após clicar em 'Começar' -->
         <div id="conteudo-jogo" class="fade-out">
-            <h1>Adivinhe a Bandeira</h1>
-            
+            <!-- Título removido desta tela -->
             <div class="placar-container">
                 <div class="placar-item mobile-hide">Acertos: <span id="placar-acertos">0</span></div>
                 <div class="placar-item mobile-hide">Sequência: <span id="placar-streak">0</span></div>
@@ -635,7 +634,6 @@
             atualizarPlacar();
         }
 
-        // MODIFICADO: Função para atualizar todos os placares
         function atualizarPlacar() {
             placarAcertosElemento.textContent = placarAcertos;
             placarStreakElemento.textContent = sequenciaAcertos;
@@ -725,9 +723,15 @@
             telaInicial.classList.add('fade-in');
         }
         
+        // MODIFICADO: Função de compartilhamento com nova mensagem
         function compartilharComPedro() {
             const numeroTelefone = '5534988301561'; 
-            const mensagem = `Meu resultado no Adivinhe a Bandeira:\n\nAcertos: ${placarAcertos}\nTempo Total: ${placarFinalTempoElemento.textContent}`;
+            let mensagem = `Meu resultado no Adivinhe a Bandeira:\n\nAcertos: ${placarAcertos}\nTempo Total: ${placarFinalTempoElemento.textContent}`;
+
+            if (placarAcertos < bandeiras.length) {
+                mensagem += "\n\nNão foi dessa vez que você ganhou os 20 reais. Tente novamente!";
+            }
+
             const url = `https://api.whatsapp.com/send?phone=${numeroTelefone}&text=${encodeURIComponent(mensagem)}`;
             window.open(url, '_blank');
         }
@@ -738,7 +742,6 @@
             opcoesContainer.addEventListener('click', verificarResposta);
             btnCompartilharWhatsApp.addEventListener('click', compartilharComPedro);
             
-            // MODIFICADO: Define o estado inicial do placar de bandeiras
             placarTotalBandeirasElemento.textContent = `0/${bandeiras.length}`;
         });
     </script>
