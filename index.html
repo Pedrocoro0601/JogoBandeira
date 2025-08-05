@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+<!DOCTYPE-html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adivinhe a Bandeira</title>
-    <!-- Fonte Inter do Google Fonts -->
+    <!-- Font Inter from Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <!-- NOVO: Biblioteca para gerar o código de validação (hash) -->
+    <!-- Biblioteca para gerar o código de validação (hash) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         /* Estilos CSS para o jogo */
@@ -34,10 +34,25 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             text-align: center;
             flex-direction: column;
-            overflow-x: hidden;
+            overflow: hidden; /* Garante que não haja rolagem */
+        }
+        
+        #tela-inicial, #tela-dificuldade, #conteudo-jogo, #tela-fim-jogo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(10, 25, 47, 0.95);
+            padding: 20px;
+            transition: opacity var(--transicao-suave);
         }
         
         #tela-inicial {
@@ -52,19 +67,6 @@
         #tela-inicial h1, #tela-inicial p {
             color: #fff;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-        }
-
-        .creditos {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #fff;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-            background: linear-gradient(90deg, #ff0000, #ff4d4d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
         .pix-incentivo {
@@ -97,13 +99,9 @@
             margin-bottom: 20px;
         }
 
+        /* Removido o placar-container e suas regras */
         .placar-container {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 25px;
-            padding: 15px;
-            background-color: #2a354f;
-            border-radius: 15px;
+            display: none;
         }
 
         .placar-item {
@@ -117,24 +115,8 @@
             color: var(--cor-principal);
         }
 
+        /* Removido o timer-container e suas regras */
         .timer-container {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--cor-principal);
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .timer-container .circle-timer {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 5px solid var(--cor-principal);
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
             display: none;
         }
 
@@ -213,22 +195,6 @@
         .feedback.acerto { color: #28a745; }
         .feedback.erro { color: #dc3545; }
 
-        #tela-inicial, #tela-fim-jogo {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(10, 25, 47, 0.95);
-            border-radius: 20px;
-            padding: 20px;
-            transition: opacity var(--transicao-suave);
-        }
-
         #tela-fim-jogo h2 {
             font-size: 2.5rem;
             color: var(--cor-principal);
@@ -283,17 +249,129 @@
         .fade-in { opacity: 1; pointer-events: all; }
         
         .social-buttons { display: flex; gap: 15px; margin-top: 20px; }
+
+        /* Estilos para a nova tela de dificuldade */
+        .dificuldade-botoes {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+        }
+
+        .btn-dificuldade {
+            background-color: #2a354f;
+            color: var(--cor-texto);
+            border: 2px solid #2a354f;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all var(--transicao-suave);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
         
+        .btn-dificuldade:hover {
+            background-color: #3b4c6b;
+            transform: translateY(-3px);
+            border-color: var(--cor-principal);
+        }
+
+        /* Estilo para a imagem no botão Chiquinho */
+        .btn-chiquinho-icon {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 60px;
+            height: 60px;
+            border-radius: 5px;
+            border: 1px solid white;
+            background-color: #fff;
+            transform: rotate(-15deg);
+        }
+        
+        .btn-chiquinho { 
+            border-color: #64ffda; 
+            color: #64ffda;
+            padding-left: 70px;
+        }
+        .btn-chiquinho:hover { background-color: #64ffda; color: #0a192f; }
+        
+        .btn-facil { border-color: #28a745; color: #28a745; }
+        .btn-facil:hover { background-color: #28a745; color: #0a192f; }
+        
+        .btn-medio { border-color: #ffc107; color: #ffc107; }
+        .btn-medio:hover { background-color: #ffc107; color: #0a192f; }
+        
+        .btn-dificil { border-color: #dc3545; color: #dc3545; }
+        .btn-dificil:hover { background-color: #dc3545; color: #0a192f; }
+
         @media (max-width: 768px) {
-            .placar-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-            .placar-item.mobile-hide { display: none; }
-            .opcoes { grid-template-columns: 1fr; }
-            h1 { font-size: 2rem; }
-            .opcoes button { font-size: 1rem; padding: 12px 20px; }
-            .feedback { font-size: 1.2rem; }
-            #tela-fim-jogo h2 { font-size: 2rem; }
-            #tela-fim-jogo p { font-size: 1.2rem; }
-            #feedback-final { font-size: 1.5rem; }
+            body {
+                padding: 0;
+            }
+            .container {
+                padding: 0.5rem;
+            }
+            .placar-container { 
+                flex-direction: column;
+                gap: 5px; 
+                padding: 10px;
+            }
+            .placar-item {
+                font-size: 0.9rem;
+            }
+            .placar-item span {
+                font-size: 1.2rem;
+            }
+            .opcoes { 
+                grid-template-columns: 1fr; 
+                gap: 10px;
+            }
+            h1 { 
+                font-size: 1.5rem; 
+            }
+            .opcoes button { 
+                font-size: 1rem; 
+                padding: 12px 20px; 
+            }
+            .feedback { 
+                font-size: 1rem; 
+            }
+            #tela-fim-jogo h2 { 
+                font-size: 1.5rem; 
+            }
+            #tela-fim-jogo p { 
+                font-size: 1rem; 
+            }
+            #feedback-final { 
+                font-size: 1.2rem; 
+            }
+            .dificuldade-botoes { 
+                max-width: 100%; 
+            }
+            #tela-inicial, #tela-dificuldade, #conteudo-jogo, #tela-fim-jogo {
+                padding: 1rem;
+                justify-content: center;
+            }
+            .btn-principal {
+                margin-top: 10px;
+                padding: 12px 24px;
+            }
+            .pix-incentivo {
+                font-size: 0.9rem;
+            }
+            .btn-dificuldade {
+                padding: 15px;
+            }
+            /* O ícone Chiquinho agora tem o mesmo tamanho em mobile */
+            .btn-chiquinho-icon {
+                width: 60px;
+                height: 60px;
+            }
         }
     </style>
 </head>
@@ -301,24 +379,27 @@
     <div class="container" id="jogo-container">
         <div id="tela-inicial" class="fade-in">
             <h1>Adivinhe a Bandeira</h1>
+            <p class="pix-incentivo">Acerte todas as bandeiras do nível mais difícil e ganhe um <span class="pix-valor">PIX de R$20!</span></p>
             <button id="btn-iniciar" class="btn-principal">Começar Jogo</button>
-            <p class="pix-incentivo">Acerte todas as bandeiras e ganhe um <span class="pix-valor">PIX de R$20! (Sem limite)</span></p>
-            <p class="creditos">Feito por Pedro Henrique</p>
+        </div>
+        
+        <!-- NOVA TELA DE SELEÇÃO DE DIFICULDADE -->
+        <div id="tela-dificuldade" class="fade-out">
+            <h1>Selecione a Dificuldade</h1>
+            <div class="dificuldade-botoes">
+                <button class="btn-dificuldade btn-chiquinho" onclick="iniciarJogo('chiquinho')">
+                    <img src="chico.png" class="btn-chiquinho-icon" alt="Ícone Chiquinho">
+                    Chiquinho
+                </button>
+                <button class="btn-dificuldade btn-facil" onclick="iniciarJogo('facil')">Fácil</button>
+                <button class="btn-dificuldade btn-medio" onclick="iniciarJogo('medio')">Médio</button>
+                <button class="btn-dificuldade btn-dificil" onclick="iniciarJogo('dificil')">Difícil</button>
+            </div>
+            <p class="pix-incentivo">Somente o nível **Difícil** vale o PIX!</p>
         </div>
 
         <div id="conteudo-jogo" class="fade-out">
-            <div class="placar-container">
-                <div class="placar-item mobile-hide">Acertos: <span id="placar-acertos">0</span></div>
-                <div class="placar-item mobile-hide">Sequência: <span id="placar-streak">0</span></div>
-                <div class="placar-item">Tempo Total: <span id="placar-tempo-total">00:00</span></div>
-                <div class="placar-item">Total de Bandeiras: <span id="placar-total-bandeiras">0/219</span></div>
-            </div>
-
-            <div class="timer-container">
-                <div class="circle-timer" id="round-spinner"></div>
-                Tempo Restante: <span id="placar-tempo-rodada">5</span>
-            </div>
-
+            <!-- Removido todo o placar e o timer do jogo para um layout mais limpo -->
             <div class="bandeira-container">
                 <img id="bandeira" src="" alt="Bandeira do país" onerror="this.onerror=null;this.src='https://placehold.co/320x213/f0f0f0/cccccc?text=Bandeira';">
             </div>
@@ -336,20 +417,20 @@
         <div id="tela-fim-jogo" class="fade-out">
             <h2>Fim de Jogo!</h2>
             <p id="feedback-final"></p>
-            <p>Seu placar final foi: <span id="placar-final-acertos">0</span> acertos.</p>
-            <p>Seu tempo total de jogo foi: <span id="placar-final-tempo">00:00</span>.</p>
+            <!-- Removido o placar final e o tempo de jogo -->
             <div id="validacao-container">
                 Código de Validação: <span id="codigo-validacao"></span>
             </div>
             <div class="social-buttons">
                 <button id="btn-compartilhar-whatsapp" class="btn-principal">Compartilhar Resultado com Pedro</button>
             </div>
-            <button id="btn-reiniciar" class="btn-principal">Jogar Novamente</button>
+            <button id="btn-reiniciar" class="btn-principal" onclick="voltarParaTelaInicial()">Jogar Novamente</button>
         </div>
     </div>
     
     <script>
-        const bandeiras = [
+        // Dados das bandeiras
+        const bandeirasDificil = [
             { pais: "Brasil", codigo: "br" }, { pais: "Japão", codigo: "jp" }, { pais: "Estados Unidos", codigo: "us" },
             { pais: "Canadá", codigo: "ca" }, { pais: "Austrália", codigo: "au" }, { pais: "Alemanha", codigo: "de" },
             { pais: "França", codigo: "fr" }, { pais: "Itália", codigo: "it" }, { pais: "Espanha", codigo: "es" },
@@ -425,47 +506,109 @@
             { pais: "Território Britânico do Oceano Índico", codigo: "io" }, { pais: "Ilhas Virgens Americanas", codigo: "vi" }, { pais: "Ilhas Turcas e Caicos", codigo: "tc" }
         ];
 
+        // Listas de bandeiras por dificuldade
+        const bandeirasChiquinho = [
+            { pais: "Brasil", codigo: "br" }, { pais: "Estados Unidos", codigo: "us" }, { pais: "Japão", codigo: "jp" },
+            { pais: "Alemanha", codigo: "de" }, { pais: "China", codigo: "cn" }, { pais: "Rússia", codigo: "ru" },
+            { pais: "Reino Unido", codigo: "gb" }, { pais: "Argentina", codigo: "ar" }, { pais: "México", codigo: "mx" },
+            { pais: "Portugal", codigo: "pt" }, { pais: "Espanha", codigo: "es" }, { pais: "Itália", codigo: "it" }
+        ];
+
+        const bandeirasFacil = bandeirasChiquinho.concat([
+            { pais: "Canadá", codigo: "ca" }, { pais: "Austrália", codigo: "au" }, { pais: "França", codigo: "fr" },
+            { pais: "Índia", codigo: "in" }, { pais: "Coreia do Sul", codigo: "kr" }, { pais: "Holanda", codigo: "nl" },
+            { pais: "Bélgica", codigo: "be" }, { pais: "Suíça", codigo: "ch" }, { pais: "Grécia", codigo: "gr" },
+            { pais: "Colômbia", codigo: "co" }, { pais: "África do Sul", codigo: "za" }, { pais: "Nova Zelândia", codigo: "nz" }
+        ]);
+
+        const bandeirasMedio = bandeirasFacil.concat([
+            { pais: "Chile", codigo: "cl" }, { pais: "Peru", codigo: "pe" }, { pais: "Egito", codigo: "eg" },
+            { pais: "Tailândia", codigo: "th" }, { pais: "Turquia", codigo: "tr" }, { pais: "Noruega", codigo: "no" },
+            { pais: "Suécia", codigo: "se" }, { pais: "Finlândia", codigo: "fi" }, { pais: "Irlanda", codigo: "ie" },
+            { pais: "Ucrânia", codigo: "ua" }, { pais: "Polônia", codigo: "pl" }, { pais: "Catar", codigo: "qa" },
+            { pais: "Arábia Saudita", codigo: "sa" }, { pais: "Israel", codigo: "il" }, { pais: "Singapura", codigo: "sg" },
+            { pais: "Indonésia", codigo: "id" }, { pais: "Malásia", codigo: "my" }, { pais: "Filipinas", codigo: "ph" },
+            { pais: "Vietnã", codigo: "vn" }, { pais: "Áustria", codigo: "at" }, { pais: "Croácia", codigo: "hr" },
+            { pais: "Marrocos", codigo: "ma" }, { pais: "Nigéria", codigo: "ng" }, { pais: "Quênia", codigo: "ke" }
+        ]);
+
+        // Variáveis globais do jogo
+        let bandeirasAtuais = []; // A lista de bandeiras do nível escolhido
+        let bandeirasDisponiveis = []; // A lista de bandeiras para a rodada, sem repetição
         let placarAcertos = 0;
-        let tempoTotalJogo = 0;
+        // Removido tempoTotalJogo
         let timerRodada;
         let timerJogo;
         let jogoAtivo = false;
+        let nivelDificuldade = '';
         const SECRET_KEY = "SuaChaveSuperSecretaAqui";
 
+        // Elementos do DOM
         const telaInicial = document.getElementById('tela-inicial');
+        const telaDificuldade = document.getElementById('tela-dificuldade');
         const conteudoJogo = document.getElementById('conteudo-jogo');
         const telaFimJogo = document.getElementById('tela-fim-jogo');
         const btnIniciar = document.getElementById('btn-iniciar');
         const btnReiniciar = document.getElementById('btn-reiniciar');
         const btnCompartilharWhatsApp = document.getElementById('btn-compartilhar-whatsapp');
-        const placarTotalBandeirasElemento = document.getElementById('placar-total-bandeiras');
+        // Removido placarTotalBandeirasElemento
         const placarFinalAcertosElemento = document.getElementById('placar-final-acertos');
         const placarFinalTempoElemento = document.getElementById('placar-final-tempo');
         const feedbackFinalElemento = document.getElementById('feedback-final');
         const codigoValidacaoElemento = document.getElementById('codigo-validacao');
         
-        function iniciarJogo() {
-            jogoAtivo = true;
-            placarAcertos = 0;
-            tempoTotalJogo = 0;
-            
-            atualizarPlacar();
-
+        // Função para mostrar a tela de seleção de dificuldade
+        function mostrarTelaDificuldade() {
             telaInicial.classList.remove('fade-in');
             telaInicial.classList.add('fade-out');
+            telaDificuldade.classList.remove('fade-out');
+            telaDificuldade.classList.add('fade-in');
+        }
+
+        // Função para iniciar o jogo com a dificuldade selecionada
+        function iniciarJogo(dificuldade) {
+            nivelDificuldade = dificuldade;
+            switch (dificuldade) {
+                case 'chiquinho':
+                    bandeirasAtuais = bandeirasChiquinho;
+                    break;
+                case 'facil':
+                    bandeirasAtuais = bandeirasFacil;
+                    break;
+                case 'medio':
+                    bandeirasAtuais = bandeirasMedio;
+                    break;
+                case 'dificil':
+                    bandeirasAtuais = bandeirasDificil;
+                    break;
+            }
+            
+            // Cria uma cópia da lista e a embaralha para o jogo atual (evitando repetição)
+            bandeirasDisponiveis = [...bandeirasAtuais];
+            embaralharArray(bandeirasDisponiveis);
+
+            jogoAtivo = true;
+            placarAcertos = 0;
+            
+            // Removido a chamada para atualizarPlacar
+            
+            telaDificuldade.classList.remove('fade-in');
+            telaDificuldade.classList.add('fade-out');
             conteudoJogo.classList.remove('fade-out');
             conteudoJogo.classList.add('fade-in');
             telaFimJogo.classList.remove('fade-in');
             telaFimJogo.classList.add('fade-out');
 
-            iniciarCronometroJogo();
             proximaRodada();
         }
 
         function proximaRodada() {
-            let tempoRestanteRodada = 5;
-            document.getElementById('placar-tempo-rodada').textContent = tempoRestanteRodada;
-            document.getElementById('round-spinner').style.display = 'block';
+            // Verifica se ainda há bandeiras para mostrar
+            if (bandeirasDisponiveis.length === 0) {
+                fimDeJogo();
+                return;
+            }
+
             document.getElementById('feedback-mensagem').textContent = '';
             document.getElementById('feedback-mensagem').className = 'feedback';
 
@@ -475,7 +618,8 @@
                 btn.classList.remove('correta', 'incorreta');
             });
             
-            const bandeiraCorreta = bandeiras[Math.floor(Math.random() * bandeiras.length)];
+            // Pega a próxima bandeira da lista embaralhada
+            const bandeiraCorreta = bandeirasDisponiveis.pop();
             window.bandeiraAtual = bandeiraCorreta;
 
             const opcoesIncorretas = selecionarOpcoesIncorretas(bandeiraCorreta.pais, 3);
@@ -487,12 +631,11 @@
             opcoesBotoes.forEach((btn, index) => {
                 btn.textContent = opcoesParaExibir[index];
             });
-
-            iniciarCronometroRodada(tempoRestanteRodada);
         }
 
         function selecionarOpcoesIncorretas(paisCorreto, quantidade) {
-            const opcoes = bandeiras.map(b => b.pais).filter(p => p !== paisCorreto);
+            // Seleciona opções incorretas de toda a lista do nível atual, não apenas as restantes
+            const opcoes = bandeirasAtuais.map(b => b.pais).filter(p => p !== paisCorreto);
             const opcoesAleatorias = [];
             while (opcoesAleatorias.length < quantidade) {
                 const index = Math.floor(Math.random() * opcoes.length);
@@ -516,8 +659,6 @@
             const botaoClicado = event.target;
             if (!botaoClicado.classList.contains('opcao-btn')) return;
 
-            clearInterval(timerRodada);
-            document.getElementById('round-spinner').style.display = 'none';
             Array.from(document.getElementById('opcoes-container').children).forEach(btn => btn.disabled = true);
             
             const respostaCorreta = window.bandeiraAtual.pais;
@@ -533,70 +674,33 @@
                 if (botaoCorreto) botaoCorreto.classList.add('correta');
                 document.getElementById('feedback-mensagem').textContent = `Errado! A resposta era ${respostaCorreta}.`;
                 document.getElementById('feedback-mensagem').classList.add('erro');
+                // Adicionado: Chama a tela de fim de jogo após um erro
                 setTimeout(fimDeJogo, 2000);
             }
-            atualizarPlacar();
         }
 
-        function atualizarPlacar() {
-            document.getElementById('placar-acertos').textContent = placarAcertos;
-            placarTotalBandeirasElemento.textContent = `${String(placarAcertos).padStart(2, '0')}/${bandeiras.length}`;
-        }
-
-        function iniciarCronometroRodada(tempo) {
-            let tempoRestante = tempo;
-            timerRodada = setInterval(() => {
-                tempoRestante--;
-                document.getElementById('placar-tempo-rodada').textContent = tempoRestante;
-                if (tempoRestante <= 0) {
-                    clearInterval(timerRodada);
-                    document.getElementById('round-spinner').style.display = 'none';
-                    const respostaCorreta = window.bandeiraAtual.pais;
-                    document.getElementById('feedback-mensagem').textContent = `Tempo esgotado! A resposta era ${respostaCorreta}.`;
-                    document.getElementById('feedback-mensagem').classList.add('erro');
-                    Array.from(document.getElementById('opcoes-container').children).forEach(btn => btn.disabled = true);
-                    setTimeout(fimDeJogo, 2000);
-                }
-            }, 1000);
-        }
-
-        function iniciarCronometroJogo() {
-            let segundos = 0;
-            timerJogo = setInterval(() => {
-                segundos++;
-                tempoTotalJogo = segundos;
-                const minutos = Math.floor(segundos / 60);
-                const segundosRestantes = segundos % 60;
-                document.getElementById('placar-tempo-total').textContent = 
-                    `${String(minutos).padStart(2, '0')}:${String(segundosRestantes).padStart(2, '0')}`;
-            }, 1000);
-        }
-
-        function gerarCodigoValidacao(acertos, tempo) {
-            const data = `${acertos}-${tempo}-${SECRET_KEY}`;
+        function gerarCodigoValidacao(acertos) {
+            const data = `${acertos}-${SECRET_KEY}`;
             const hash = CryptoJS.SHA256(data).toString();
             return hash.substring(0, 8).toUpperCase();
         }
 
         function fimDeJogo() {
             jogoAtivo = false;
-            clearInterval(timerRodada);
-            clearInterval(timerJogo);
 
-            const minutos = Math.floor(tempoTotalJogo / 60);
-            const segundosRestantes = tempoTotalJogo % 60;
-            const tempoFormatado = `${String(minutos).padStart(2, '0')}:${String(segundosRestantes).padStart(2, '0')}`;
+            const tempoFormatado = "00:00"; // Removido o cálculo do tempo
             
-            placarFinalAcertosElemento.textContent = placarAcertos;
-            placarFinalTempoElemento.textContent = tempoFormatado;
+            // Removido o placar final e o tempo de jogo na tela de fim de jogo
             
             const codigo = gerarCodigoValidacao(placarAcertos, tempoFormatado);
             codigoValidacaoElemento.textContent = codigo;
 
-            if (placarAcertos === bandeiras.length) {
-                feedbackFinalElemento.textContent = "Parabéns! Você acertou todas e ganhou o PIX!";
+            if (placarAcertos === bandeirasAtuais.length && nivelDificuldade === 'dificil') {
+                feedbackFinalElemento.textContent = "Parabéns! Você acertou todas do nível difícil e ganhou o PIX!";
+            } else if (placarAcertos === bandeirasAtuais.length) {
+                feedbackFinalElemento.textContent = `Parabéns! Você acertou todas do nível ${nivelDificuldade}!`;
             } else {
-                feedbackFinalElemento.textContent = "Precisa estudar mais as bandeiras!";
+                feedbackFinalElemento.textContent = `Precisa estudar mais as bandeiras do nível ${nivelDificuldade}!`;
             }
 
             conteudoJogo.classList.remove('fade-in');
@@ -605,7 +709,8 @@
             telaFimJogo.classList.add('fade-in');
         }
 
-        function reiniciarJogo() {
+        // Função para voltar à tela inicial (NOVO)
+        function voltarParaTelaInicial() {
             telaFimJogo.classList.remove('fade-in');
             telaFimJogo.classList.add('fade-out');
             telaInicial.classList.remove('fade-out');
@@ -614,15 +719,16 @@
         
         function compartilharComPedro() {
             const numeroTelefone = '5534988301561';
-            const tempoFinal = placarFinalTempoElemento.textContent;
             const codigo = codigoValidacaoElemento.textContent;
             
-            let mensagem = `Meu resultado no Adivinhe a Bandeira:\n\nAcertos: ${placarAcertos}\nTempo Total: ${tempoFinal}\nCódigo: ${codigo}`;
+            let mensagem = `Meu resultado no Adivinhe a Bandeira (Nível ${nivelDificuldade.toUpperCase()}):\n\nAcertos: ${placarAcertos}\nCódigo: ${codigo}`;
 
-            if (placarAcertos < bandeiras.length) {
-                mensagem += "\n\nNão foi dessa vez que ganhei os 20 reais. Tente novamente!";
+            if (placarAcertos === bandeirasAtuais.length && nivelDificuldade === 'dificil') {
+                mensagem += "\n\nConsegui! Acertei todas as bandeiras do nível difícil e ganhei o PIX!";
+            } else if (placarAcertos === bandeirasAtuais.length) {
+                mensagem += `\n\nConsegui! Acertei todas as bandeiras do nível ${nivelDificuldade}!`;
             } else {
-                mensagem += "\n\nConsegui! Acertei todas as bandeiras!";
+                mensagem += "\n\nNão foi dessa vez que ganhei os 20 reais. Tente novamente!";
             }
 
             const url = `https://api.whatsapp.com/send?phone=${numeroTelefone}&text=${encodeURIComponent(mensagem)}`;
@@ -630,11 +736,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            btnIniciar.addEventListener('click', iniciarJogo);
-            btnReiniciar.addEventListener('click', reiniciarJogo);
+            btnIniciar.addEventListener('click', mostrarTelaDificuldade);
+            btnReiniciar.addEventListener('click', voltarParaTelaInicial);
             document.getElementById('opcoes-container').addEventListener('click', verificarResposta);
             btnCompartilharWhatsApp.addEventListener('click', compartilharComPedro);
-            placarTotalBandeirasElemento.textContent = `0/${bandeiras.length}`;
         });
     </script>
 </body>
